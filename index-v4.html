@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VMMSNN2P11"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){{dataLayer.push(arguments);}}
+    gtag('js', new Date());
+    gtag('config', 'G-VMMSNN2P11');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Picker × Salvator's — Propuesta v4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: hsl(212 100% 97%); --card: hsl(0 0% 100%); --border: hsl(214 33% 91%);
+      --text: hsl(229 35% 16%); --sub: hsl(222 18% 38%); --muted: hsl(216 30% 60%);
+      --celeste: hsl(193 100% 45%); --celeste-dim: hsl(193 100% 45% / .12); --celeste-mid: hsl(193 100% 45% / .3);
+      --green: hsl(162 100% 36%); --green-dim: hsl(162 100% 44% / .14); --green-mid: hsl(162 100% 44% / .3); --green-text: hsl(162 100% 28%);
+      --mint: hsl(162 55% 88%); --mint-text: hsl(162 100% 24%);
+      --amber: hsl(43 100% 45%); --amber-bg: hsl(43 100% 67% / .15);
+      --red: hsl(346 100% 45%); --red-bg: hsl(346 100% 63% / .1);
+    }
+    html, body { height: 100%; background: var(--bg); font-family: 'Montserrat', sans-serif; color: var(--text); overflow: hidden; }
+    #deck { width: 100vw; height: 100vh; position: relative; }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 64px; opacity: 0; transform: translateX(36px); transition: opacity .4s cubic-bezier(.4,0,.2,1), transform .4s cubic-bezier(.4,0,.2,1); pointer-events: none; overflow: hidden; background: var(--bg); }
+    .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+    .slide.exit { opacity: 0; transform: translateX(-36px); }
+    #nav { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; z-index: 100; }
+    .nav-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .nav-btn:hover { border-color: var(--celeste); color: var(--celeste); }
+    .nav-btn:disabled { opacity: .35; cursor: default; }
+    .nav-btn svg { width: 14px; height: 14px; }
+    #indicators { display: flex; gap: 6px; align-items: center; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: all .25s; cursor: pointer; }
+    .dot.on { background: var(--celeste); width: 20px; border-radius: 3px; }
+    #slide-num { position: fixed; top: 18px; right: 24px; font-size: 11px; color: var(--muted); letter-spacing: .05em; font-weight: 600; }
+    /* breadcrumb label — JD style */
+    .label-bar { display: inline-flex; align-items: center; background: hsl(212 60% 93%); border-radius: 6px; padding: 5px 14px; font-size: 11px; font-weight: 700; color: var(--celeste); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+    .label-bar.red { background: var(--red-bg); color: var(--red); }
+    .label-bar.green { background: var(--green-dim); color: var(--green-text); }
+    .label-bar.dark { background: hsl(229 35% 22%); color: hsl(193 100% 65%); }
+    h1 { font-size: clamp(34px, 4.4vw, 60px); font-weight: 800; line-height: 1.05; }
+    h2 { font-size: clamp(20px, 2.5vw, 34px); font-weight: 700; line-height: 1.15; }
+    .sub-head { font-size: clamp(13px, 1.1vw, 16px); color: var(--sub); font-weight: 400; line-height: 1.5; margin-top: 8px; }
+    .content { width: 100%; max-width: 1100px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; box-shadow: 0 1px 6px hsl(229 35% 16% / .06); }
+    .card-sm { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; }
+    .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+    .val { font-size: clamp(28px, 3.2vw, 44px); font-weight: 900; }
+    .val.r { color: var(--red); } .val.a { color: var(--amber); } .val.b { color: var(--celeste); } .val.g { color: var(--green-text); }
+    .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+    .desc { font-size: 12px; color: var(--sub); margin-top: 2px; font-weight: 500; }
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; padding: 7px 12px; text-align: left; border-bottom: 2px solid var(--border); }
+    .tbl th.r { text-align: right; }
+    .tbl td { padding: 8px 12px; font-size: 12.5px; font-weight: 500; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl .total td { font-weight: 800; font-size: 13px; border-top: 2px solid var(--border); border-bottom: none; }
+    .tbl .hl td { background: hsl(162 100% 44% / .08); }
+    .tbl .r { text-align: right; }
+    .tbl .g { color: var(--green-text) !important; font-weight: 700 !important; }
+    .tbl .rv { color: var(--red) !important; font-weight: 700 !important; }
+    .tbl .dim { color: var(--muted) !important; font-size: 11px !important; }
+    /* JD-style mint banner */
+    .mint-banner { background: var(--mint); border-radius: 12px; padding: 16px 28px; text-align: center; }
+    .mint-banner .label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--mint-text); margin-bottom: 4px; }
+    .mint-banner .big { font-size: clamp(26px, 3vw, 40px); font-weight: 900; color: var(--mint-text); line-height: 1; }
+    .mint-banner .note { font-size: 11px; color: hsl(162 40% 40%); margin-top: 4px; font-weight: 500; }
+    /* comparison rows */
+    .cmp-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .cmp-row:last-child { border-bottom: none; }
+    .cmp-row .key { color: var(--sub); font-weight: 500; }
+    .cmp-row .bad { color: var(--red); font-weight: 700; }
+    .cmp-row .good { color: var(--green-text); font-weight: 700; }
+    /* bullet row */
+    .bul { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 7px; }
+    .bul-dot { min-width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .bul span { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .bul span.s { color: var(--sub); font-weight: 500; }
+    .picker-mark { font-size: 13px; font-weight: 800; letter-spacing: .07em; color: var(--celeste); }
+    .row-item { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; font-weight: 500; color: var(--sub); line-height: 1.45; margin-bottom: 7px; }
+    .row-dot { min-width: 6px; height: 6px; border-radius: 50%; background: var(--celeste); margin-top: 5px; flex-shrink: 0; }
+    .row-dot.g { background: var(--green); } .row-dot.r { background: var(--red); }
+  @media print {
+    html, body { height:auto; overflow:visible; }
+    #deck { height:auto; position:relative; }
+    .slide { position:relative !important; opacity:1 !important; transform:none !important; pointer-events:all !important; page-break-after:always; break-after:page; height:100vh; min-height:100vh; }
+    #nav, #slide-num { display:none !important; }
+  }
+  </style>
+</head>
+<body>
+<div id="deck">
+
+<!-- S1 · PORTADA -->
+<div class="slide active">
+  <div class="content" style="display:flex;flex-direction:column;gap:28px;max-width:860px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="picker-mark">PICKER</span>
+      <span style="color:var(--border);font-size:18px;font-weight:300;">×</span>
+      <img src="https://www.salvators.com.co/wp-content/uploads/2020/10/logo.png" alt="Salvator's Pizza & Pasta" style="height:52px;object-fit:contain;" onerror="this.style.display='none';this.nextSibling.style.display='inline'"><span style="font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.06em;display:none;">SALVATOR'S PIZZA &amp; PASTA</span>
+    </div>
+    <div>
+      <h1>Ahorra hasta $83.4M al mes<br/><span style="color:var(--celeste);">en costos de flota.</span></h1>
+      <div style="width:72px;height:4px;background:var(--celeste);border-radius:2px;margin-top:20px;"></div>
+    </div>
+    <p style="max-width:580px;font-size:15px;line-height:1.65;color:var(--sub);">Hoy pagas $176M al mes en flota fija — sin importar si tienes 5,000 o 15,000 pedidos.<br/>Con Picker, pagas por envío, no por persona. El ahorro es desde el mes 1.</p>
+    <div style="display:flex;gap:36px;padding-top:4px;">
+      <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:4px;">Operación</div><div style="font-size:15px;font-weight:700;">23 locales · 11,000 envíos/mes · Colombia</div></div>
+      <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:4px;">Fecha</div><div style="font-size:15px;font-weight:700;">Junio 2026</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S2 · SITUACIÓN HOY -->
+<div class="slide">
+  <div class="content" style="display:flex;flex-direction:column;gap:16px;">
+    <div><div class="label-bar red">Lo que ya sabemos de ti</div>
+      <h2>Esto es lo que tiene tu operación hoy — con los números que nos compartiste.</h2></div>
+    <div class="grid4">
+      <div class="stat-box"><div class="lbl">Costo flota total</div><div class="val r">$176M</div><div class="desc">COP/mes · fijo sin importar volumen</div></div>
+      <div class="stat-box"><div class="lbl">Riders propios nómina</div><div class="val">22</div><div class="desc">$77M/mes · contrato laboral</div></div>
+      <div class="stat-box"><div class="lbl">Riders externos</div><div class="val a">~28</div><div class="desc">$99.1M/mes · sin SLA ni datos</div></div>
+      <div class="stat-box"><div class="lbl">Pedidos con datáfono</div><div class="val b">50%</div><div class="desc">de los 11,000 envíos/mes</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="lbl" style="margin-bottom:12px;">Cómo llegamos a ~28 riders externos</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="background:var(--red-bg);border:1px solid hsl(346 100% 45%/.25);border-radius:10px;padding:12px 14px;text-align:center;flex:1;">
+            <div style="font-size:10px;color:var(--red);font-weight:800;text-transform:uppercase;margin-bottom:3px;">De tu Excel</div>
+            <div style="font-size:28px;font-weight:900;color:var(--red);">$99.1M</div>
+            <div style="font-size:11px;color:var(--sub);">gasto mensual externos</div>
+          </div>
+          <div style="font-size:24px;color:var(--border);font-weight:300;">÷</div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;flex:1;">
+            <div style="font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;margin-bottom:3px;">Costo promedio</div>
+            <div style="font-size:28px;font-weight:900;">$3.5M</div>
+            <div style="font-size:11px;color:var(--sub);">por rider externo/mes</div>
+          </div>
+          <div style="font-size:24px;color:var(--border);font-weight:300;">=</div>
+          <div style="background:var(--celeste-dim);border:2px solid hsl(193 100% 45%/.3);border-radius:10px;padding:12px 14px;text-align:center;flex:1;">
+            <div style="font-size:10px;color:var(--celeste);font-weight:800;text-transform:uppercase;margin-bottom:3px;">Riders externos</div>
+            <div style="font-size:36px;font-weight:900;color:var(--celeste);">~28</div>
+            <div style="font-size:11px;color:var(--sub);">facturados c/mes</div>
+          </div>
+        </div>
+        <div style="background:hsl(43 100% 67%/.2);border:1px solid hsl(43 100% 45%/.3);border-radius:8px;padding:10px 14px;font-size:13px;color:hsl(43 100% 28%);font-weight:600;">Estos ~28 riders son el objetivo: costo externo sin control que Picker convierte en 100% variable.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card">
+          <div class="lbl" style="margin-bottom:12px;">Composición del costo · $176M</div>
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;"><span style="font-size:14px;font-weight:700;">22 riders propios · nómina</span><span style="font-size:17px;font-weight:900;">$77M</span></div>
+            <div style="height:11px;background:var(--border);border-radius:6px;overflow:hidden;"><div style="height:100%;width:44%;background:var(--muted);border-radius:6px;"></div></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">44% · inamovibles por el datáfono</div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;"><span style="font-size:14px;font-weight:700;">~28 riders externos · terceros</span><span style="font-size:17px;font-weight:900;color:var(--red);">$99.1M</span></div>
+            <div style="height:11px;background:var(--border);border-radius:6px;overflow:hidden;"><div style="height:100%;width:56%;background:var(--red);border-radius:6px;"></div></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">56% · este bloque Picker lo hace variable</div>
+          </div>
+        </div>
+        <div style="background:var(--text);border-radius:12px;padding:16px 22px;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--celeste);margin-bottom:8px;">El objetivo</div>
+          <div style="font-size:19px;font-weight:800;color:white;line-height:1.3;">Convertir los $99.1M de riders externos en costo variable — pagas por envío, no por persona.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S3 · DOLORES + TOTAL EN JUEGO -->
+<div class="slide" style="padding-bottom:72px;justify-content:flex-start;padding-top:28px;">
+  <div class="content" style="display:flex;flex-direction:column;gap:8px;">
+    <div><div class="label-bar red">Diagnóstico</div>
+      <h2>Cuatro dolores — y un total de ineficiencias que se puede eliminar.</h2></div>
+    <div class="grid2" style="gap:8px;">
+      <div class="card" style="border-top:3px solid var(--red);display:flex;flex-direction:column;gap:6px;padding:10px 14px;">
+        <div style="font-size:22px;">💸</div>
+        <div style="font-size:30px;font-weight:900;color:var(--red);line-height:1;">$99.1M</div>
+        <div style="font-weight:800;font-size:13px;line-height:1.2;">en riders externos sin control ni SLA</div>
+        <div>
+          <div class="bul"><div class="bul-dot" style="background:var(--red);"></div><span class="s">Pagas igual con 5K o 15K pedidos</span></div>
+          <div class="bul"><div class="bul-dot" style="background:var(--red);"></div><span class="s">Baja disponibilidad → pedidos se retrasan sin aviso</span></div>
+          <div class="bul"><div class="bul-dot" style="background:var(--red);"></div><span class="s">Incidencias por teléfono — datos en sistema del proveedor</span></div>
+        </div>
+        <div style="background:var(--red-bg);border:1px solid hsl(346 100% 45%/.3);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--red);font-weight:700;margin-top:auto;">28 riders que gestionas por WhatsApp — sin datos, sin SLA</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--amber);display:flex;flex-direction:column;gap:6px;padding:10px 14px;">
+        <div style="font-size:22px;">🔒</div>
+        <div style="font-size:30px;font-weight:900;color:var(--amber);line-height:1;">50%</div>
+        <div style="font-weight:800;font-size:13px;line-height:1.2;">datáfono = 22 riders en nómina inamovibles</div>
+        <div>
+          <div class="bul"><div class="bul-dot" style="background:var(--amber);"></div><span class="s">El cobro en datáfono obliga a mantener riders propios</span></div>
+          <div class="bul"><div class="bul-dot" style="background:var(--amber);"></div><span class="s">No puedes bajar la nómina sin resolver el cobro</span></div>
+        </div>
+        <div style="background:var(--green-dim);border:2px solid var(--green-mid);border-radius:9px;padding:8px 11px;margin-top:2px;">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--green-text);margin-bottom:5px;">✓ Solución: riders propios + ARMI</div>
+          <div style="display:flex;align-items:center;gap:5px;justify-content:center;">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;font-weight:700;text-align:center;">Pedido<br/><span style="color:var(--amber);">datáfono</span></div>
+            <div style="font-size:13px;color:var(--green);">→</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <div style="background:var(--green-dim);border:1.5px solid var(--green-mid);border-radius:5px;padding:3px 7px;font-size:10.5px;font-weight:800;color:var(--green-text);text-align:center;">Rider propio</div>
+              <div style="background:var(--green-dim);border:1.5px solid var(--green-mid);border-radius:5px;padding:3px 7px;font-size:10.5px;font-weight:800;color:var(--green-text);text-align:center;">ARMI cobra</div>
+            </div>
+            <div style="font-size:13px;color:var(--green);">→</div>
+            <div style="background:var(--green-dim);border:1.5px solid var(--green-mid);border-radius:5px;padding:4px 8px;font-size:10.5px;font-weight:800;color:var(--green-text);text-align:center;">✓ Variable<br/>sin extra</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--red);display:flex;flex-direction:column;gap:6px;padding:10px 14px;">
+        <div style="font-size:22px;">📞</div>
+        <div style="font-size:30px;font-weight:900;color:var(--red);line-height:1;">$4.95M</div>
+        <div style="font-weight:800;font-size:13px;line-height:1.2;">en CC respondiendo "¿dónde está mi pedido?"</div>
+        <div>
+          <div class="bul"><div class="bul-dot" style="background:var(--red);"></div><span class="s">15% de llamadas al CC son de tracking</span></div>
+          <div class="bul"><div class="bul-dot" style="background:var(--red);"></div><span class="s">$33M/mes en CC total → $4.95M evitables</span></div>
+          <div class="bul"><div class="bul-dot" style="background:var(--red);"></div><span class="s">Trabajo manual que WhatsApp elimina</span></div>
+        </div>
+        <div style="background:var(--red-bg);border:1px solid hsl(346 100% 45%/.3);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--red);font-weight:700;margin-top:auto;">$4.95M/mes en trabajo que la tecnología hace solo</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--amber);display:flex;flex-direction:column;gap:6px;padding:10px 14px;">
+        <div style="font-size:22px;">📍</div>
+        <div style="font-size:30px;font-weight:900;color:var(--amber);line-height:1;">0</div>
+        <div style="font-weight:800;font-size:13px;line-height:1.2;">visibilidad del cliente sobre su pedido</div>
+        <div>
+          <div class="bul"><div class="bul-dot" style="background:var(--amber);"></div><span class="s">Sin WhatsApp, sin tracking, sin ETA</span></div>
+          <div class="bul"><div class="bul-dot" style="background:var(--amber);"></div><span class="s">Entrega tardía = cliente que no regresa</span></div>
+          <div class="bul"><div class="bul-dot" style="background:var(--amber);"></div><span class="s">El 87% decide si vuelve según la experiencia</span></div>
+        </div>
+        <div style="background:hsl(43 100% 67%/.2);border:1px solid hsl(43 100% 45%/.35);border-radius:7px;padding:7px 10px;font-size:12px;color:hsl(43 100% 28%);font-weight:700;margin-top:auto;">Sin tracking = recompra en riesgo en cada pedido</div>
+      </div>
+    </div>
+    <!-- TOTAL EN JUEGO — nuevo vs v3 -->
+    <div style="background:var(--text);border-radius:12px;padding:9px 20px;display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr 1px 2fr;gap:0;align-items:center;">
+      <div style="text-align:center;padding:0 12px;">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:hsl(346 100% 65%);margin-bottom:2px;">Flota externa</div>
+        <div style="font-size:22px;font-weight:900;color:hsl(346 100% 72%);">$99.1M</div>
+      </div>
+      <div style="width:1px;height:36px;background:hsl(0 0% 100%/.1);"></div>
+      <div style="text-align:center;padding:0 12px;">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:hsl(43 100% 65%);margin-bottom:2px;">CC evitable</div>
+        <div style="font-size:22px;font-weight:900;color:hsl(43 100% 70%);">$4.95M</div>
+      </div>
+      <div style="width:1px;height:36px;background:hsl(0 0% 100%/.1);"></div>
+      <div style="text-align:center;padding:0 12px;">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:hsl(212 60% 65%);margin-bottom:2px;">Ventas en riesgo</div>
+        <div style="font-size:22px;font-weight:900;color:hsl(212 60% 75%);">$23–47M</div>
+      </div>
+      <div style="width:1px;height:36px;background:hsl(0 0% 100%/.1);"></div>
+      <div style="text-align:center;padding:0 16px;">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:hsl(162 80% 60%);margin-bottom:2px;">Total en juego</div>
+        <div style="font-size:28px;font-weight:900;color:white;">~$127–151M<span style="font-size:14px;font-weight:600;color:hsl(212 50% 65%);margin-left:4px;">/mes</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S4 · SOLUCIÓN -->
+<div class="slide">
+  <div class="content" style="display:flex;flex-direction:column;gap:14px;">
+    <div><div class="label-bar">La solución</div>
+      <h2>Picker orquesta tu delivery — un sistema, múltiples carriers, decisión automática.</h2></div>
+    <div style="display:flex;align-items:stretch;gap:0;width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:18px 12px;border-right:1px solid var(--border);">
+        <div style="width:52px;height:52px;border-radius:14px;background:var(--celeste-dim);border:1.5px solid hsl(193 100% 45%/.3);display:flex;align-items:center;justify-content:center;font-size:26px;">📱</div>
+        <div style="font-weight:800;font-size:14px;text-align:center;">Pedido entra</div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--sub);text-align:center;">App · Web · CC</div>
+      </div>
+      <div style="display:flex;align-items:center;padding:0 5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(214 33% 78%)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div style="flex:1.8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:14px;background:var(--celeste-dim);border-right:1px solid hsl(193 100% 45%/.3);">
+        <div style="width:52px;height:52px;border-radius:14px;background:var(--celeste);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 14px hsl(193 100% 45%/.3);">⚡</div>
+        <div style="font-weight:900;font-size:15px;color:var(--celeste);">Picker Flows</div>
+        <div style="background:white;border:2px solid hsl(193 100% 45%/.3);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--sub);text-align:center;width:100%;"><span style="font-weight:800;color:var(--celeste);">Datáfono</span> → Rider propio o ARMI</div>
+        <div style="background:var(--green-dim);border:1px solid var(--green-mid);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--green-text);text-align:center;width:100%;"><span style="font-weight:800;">Online / efectivo</span> → 3PL más cercano</div>
+      </div>
+      <div style="display:flex;align-items:center;padding:0 5px;background:var(--celeste-dim);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(193 60% 60%)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div style="flex:1.2;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:12px;border-right:1px solid var(--border);">
+        <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:2px;">Carrier asignado</div>
+        <div style="background:var(--green-dim);border:1.5px solid var(--green-mid);border-radius:8px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--green-text);">🛵 Riders propios (datáfono)</div>
+        <div style="background:hsl(162 100% 44%/.15);border:1.5px solid var(--green-mid);border-radius:8px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--green-text);">💳 ARMI (datáfono + variable)</div>
+        <div style="background:var(--celeste-dim);border:1px solid hsl(193 100% 45%/.3);border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;color:var(--celeste);">⚡ Rappi · Cabify · MU · Pibox</div>
+      </div>
+      <div style="display:flex;align-items:center;padding:0 5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(214 33% 78%)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px;">
+        <div style="width:52px;height:52px;border-radius:14px;background:var(--green-dim);border:1.5px solid var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:26px;">✅</div>
+        <div style="font-weight:800;font-size:14px;text-align:center;">Entregado</div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;color:var(--sub);text-align:center;">Tracking en vivo</div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;color:var(--sub);text-align:center;">WhatsApp Salvator's</div>
+      </div>
+    </div>
+    <div class="grid4" style="gap:10px;">
+      <div class="card-sm" style="border-top:3px solid var(--celeste);">
+        <div class="lbl" style="color:var(--celeste);margin-bottom:7px;">My Fleet</div>
+        <div style="font-size:13px;font-weight:800;margin-bottom:7px;">Resuelve: $99.1M externos</div>
+        <div class="row-item"><div class="row-dot"></div><span>22 riders propios en app Picker — tracking en tiempo real</span></div>
+        <div class="row-item"><div class="row-dot"></div><span>Panel unificado propios + 3PL</span></div>
+      </div>
+      <div class="card-sm" style="border-top:3px solid var(--celeste);background:var(--celeste-dim);border-color:hsl(193 100% 45%/.3);">
+        <div class="lbl" style="color:var(--celeste);margin-bottom:7px;">Flows + ARMI</div>
+        <div style="font-size:13px;font-weight:800;margin-bottom:7px;">Resuelve: datáfono</div>
+        <div class="row-item"><div class="row-dot"></div><span>Datáfono → ARMI cobra + entrega sin nómina extra</span></div>
+        <div class="row-item"><div class="row-dot"></div><span>Online / efectivo → 3PL más cercano</span></div>
+      </div>
+      <div class="card-sm" style="border-top:3px solid var(--green);">
+        <div class="lbl" style="color:var(--green-text);margin-bottom:7px;">Tracking + WhatsApp</div>
+        <div style="font-size:13px;font-weight:800;margin-bottom:7px;">Resuelve: $4.95M CC</div>
+        <div class="row-item"><div class="row-dot g"></div><span>ETA automático → el cliente no llama</span></div>
+        <div class="row-item"><div class="row-dot g"></div><span>Datos 100% de Salvator's</span></div>
+      </div>
+      <div class="card-sm" style="border-top:3px solid var(--green);">
+        <div class="lbl" style="color:var(--green-text);margin-bottom:7px;">Orquestador</div>
+        <div style="font-size:13px;font-weight:800;margin-bottom:7px;">Resuelve: costo/envío</div>
+        <div class="row-item"><div class="row-dot g"></div><span>5+ carriers: asigna el más barato y cercano</span></div>
+        <div class="row-item"><div class="row-dot g"></div><span>Tarifas preferenciales en Colombia</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S5 · BUSINESS CASE -->
+<div class="slide">
+  <div class="content" style="display:flex;flex-direction:column;gap:11px;">
+    <div>
+      <div class="label-bar green">Ejercicio financiero</div>
+      <h2>¿Cuánto ahorras? Hasta <span style="color:var(--green-text);">$83.4M más de utilidad</span> al mes.</h2>
+      <p style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:500;">Base: 11K env/mes · 23 locales · Fee $850/env + $0/local + 3.5% efectivo · Tarifa 3PL prom $7,533 · CC −15% con tracking</p>
+    </div>
+    <div style="display:grid;grid-template-columns:0.85fr 1fr 1fr 1fr;gap:8px;align-items:stretch;flex:1;">
+      <!-- ACTUAL -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg);">
+          <div class="lbl">Situación actual</div>
+          <div style="font-size:22px;font-weight:900;margin-top:4px;">$345.3M</div>
+          <div style="font-size:10px;color:var(--sub);margin-top:2px;">utilidad neta mensual</div>
+          <div style="height:36px;display:flex;align-items:center;justify-content:center;margin-top:8px;"><span style="font-size:12px;color:var(--muted);font-weight:600;">— sin cambios —</span></div>
+        </div>
+        <table class="tbl" style="flex:1;">
+          <tr><td style="font-size:11px;">Flota propios</td><td class="r" style="font-size:11px;">$77.0M</td></tr>
+          <tr><td style="font-size:11px;">Flota externa</td><td class="r rv" style="font-size:11px;">$99.1M</td></tr>
+          <tr><td style="font-size:11px;">Contact Center</td><td class="r" style="font-size:11px;">$33.0M</td></tr>
+          <tr><td style="font-size:11px;">3PL Picker</td><td class="r dim">—</td></tr>
+          <tr><td style="font-size:11px;">Picker (orquest.)</td><td class="r dim">—</td></tr>
+          <tr><td style="font-size:11px;">Recaudo 3.5%</td><td class="r dim">—</td></tr>
+          <tr class="total"><td>Total logística</td><td class="r">$209.1M</td></tr>
+        </table>
+      </div>
+      <!-- 50% PICKER -->
+      <div style="background:var(--green-dim);border:2px solid var(--green-mid);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--green-mid);">
+          <div class="lbl" style="color:var(--green-text);">50% migrado a Picker</div>
+          <div style="font-size:18px;font-weight:800;color:var(--sub);margin-top:4px;">$384.8M</div>
+          <div style="font-size:10px;color:var(--sub);margin-top:2px;">utilidad neta mensual</div>
+          <div style="margin-top:8px;background:white;border:2px solid var(--green-mid);border-radius:8px;padding:4px 8px;text-align:center;">
+            <div class="lbl" style="color:var(--green-text);">AHORRO</div>
+            <div style="font-size:26px;font-weight:900;color:var(--green-text);line-height:1;">$39.5M</div>
+            <div style="font-size:10px;color:var(--sub);font-weight:600;">más de utilidad vs hoy</div>
+          </div>
+        </div>
+        <table class="tbl" style="flex:1;">
+          <tr class="hl"><td style="font-size:11px;">Flota propios (−50%)</td><td class="r g" style="font-size:11px;">$38.5M</td></tr>
+          <tr class="hl"><td style="font-size:11px;">Flota externa (−50%)</td><td class="r g" style="font-size:11px;">$49.6M</td></tr>
+          <tr class="hl"><td style="font-size:11px;">Contact Center (−15%)</td><td class="r g" style="font-size:11px;">$28.1M</td></tr>
+          <tr class="hl"><td style="font-size:11px;">3PL Picker <span style="font-size:9px;color:var(--muted);font-weight:500;">(0-3km)</span></td><td class="r" style="font-size:11px;">$41.4M</td></tr>
+          <tr class="hl"><td style="font-size:11px;">Picker (orquest.)</td><td class="r" style="font-size:11px;">$9.35M</td></tr>
+          <tr class="hl"><td style="font-size:11px;">Recaudo 3.5%</td><td class="r" style="font-size:11px;">$2.8M</td></tr>
+          <tr class="total hl"><td>Total logística</td><td class="r g">$169.8M</td></tr>
+        </table>
+      </div>
+      <!-- 75% PICKER -->
+      <div style="background:var(--text);border:2px solid hsl(162 80% 30%);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="padding:10px 14px;border-bottom:1px solid hsl(0 0% 100%/.12);">
+          <div class="lbl" style="color:hsl(162 80% 60%);">75% migrado a Picker ⭐</div>
+          <div style="font-size:18px;font-weight:800;color:hsl(212 50% 65%);margin-top:4px;">$406.7M</div>
+          <div style="font-size:10px;color:hsl(212 50% 55%);margin-top:2px;">utilidad neta mensual</div>
+          <div style="margin-top:8px;background:hsl(162 80% 55%/.15);border:2px solid hsl(162 80% 50%/.4);border-radius:8px;padding:4px 8px;text-align:center;">
+            <div class="lbl" style="color:hsl(162 80% 60%);">AHORRO</div>
+            <div style="font-size:26px;font-weight:900;color:white;line-height:1;">$61.4M</div>
+            <div style="font-size:10px;color:hsl(212 50% 65%);font-weight:600;">más de utilidad vs hoy</div>
+          </div>
+        </div>
+        <table class="tbl" style="flex:1;">
+          <tr><td style="font-size:11px;color:hsl(162 80% 65%);background:hsl(162 80% 50%/.08);">Flota propios (−75%)</td><td class="r" style="font-size:11px;color:hsl(162 80% 60%);font-weight:700;background:hsl(162 80% 50%/.08);">$19.3M</td></tr>
+          <tr><td style="font-size:11px;color:hsl(162 80% 65%);background:hsl(162 80% 50%/.08);">Flota externa (−75%)</td><td class="r" style="font-size:11px;color:hsl(162 80% 60%);font-weight:700;background:hsl(162 80% 50%/.08);">$24.8M</td></tr>
+          <tr><td style="font-size:11px;color:hsl(162 80% 65%);background:hsl(162 80% 50%/.08);">Contact Center (−15%)</td><td class="r" style="font-size:11px;color:hsl(162 80% 60%);font-weight:700;background:hsl(162 80% 50%/.08);">$28.1M</td></tr>
+          <tr><td style="font-size:11px;color:hsl(212 50% 70%);background:hsl(162 80% 50%/.08);">3PL Picker <span style="font-size:9px;color:hsl(212 50% 55%);font-weight:500;">(0-3km)</span></td><td class="r" style="font-size:11px;color:hsl(212 50% 70%);background:hsl(162 80% 50%/.08);">$62.1M</td></tr>
+          <tr><td style="font-size:11px;color:hsl(212 50% 70%);background:hsl(162 80% 50%/.08);">Picker (orquest.)</td><td class="r" style="font-size:11px;color:hsl(212 50% 70%);background:hsl(162 80% 50%/.08);">$9.35M</td></tr>
+          <tr><td style="font-size:11px;color:hsl(212 50% 70%);background:hsl(162 80% 50%/.08);">Recaudo 3.5%</td><td class="r" style="font-size:11px;color:hsl(212 50% 70%);background:hsl(162 80% 50%/.08);">$4.2M</td></tr>
+          <tr><td style="font-size:12px;font-weight:800;color:white;border-top:2px solid hsl(0 0% 100%/.15);">Total logística</td><td class="r" style="font-size:12px;font-weight:800;color:hsl(162 80% 60%);border-top:2px solid hsl(0 0% 100%/.15);">$147.9M</td></tr>
+        </table>
+      </div>
+      <!-- 100% PICKER — FLOTA CERO -->
+      <div style="background:hsl(229 35% 10%);border:2px solid var(--celeste);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="padding:10px 14px;border-bottom:1px solid hsl(193 100% 45%/.3);">
+          <div class="lbl" style="color:var(--celeste);">100% Picker · flota cero ⚡</div>
+          <div style="font-size:18px;font-weight:800;color:hsl(212 50% 65%);margin-top:4px;">$428.6M</div>
+          <div style="font-size:10px;color:hsl(212 50% 55%);margin-top:2px;">utilidad neta mensual</div>
+          <div style="margin-top:8px;background:hsl(193 100% 45%/.15);border:2px solid hsl(193 100% 45%/.5);border-radius:8px;padding:4px 8px;text-align:center;">
+            <div class="lbl" style="color:var(--celeste);">AHORRO</div>
+            <div style="font-size:26px;font-weight:900;color:var(--celeste);line-height:1;">$83.4M</div>
+            <div style="font-size:10px;color:hsl(212 50% 65%);font-weight:600;">más de utilidad vs hoy</div>
+          </div>
+        </div>
+        <table class="tbl" style="flex:1;">
+          <tr><td style="font-size:11px;color:var(--celeste);background:hsl(193 100% 45%/.06);">Flota propios (−100%)</td><td class="r" style="font-size:11px;color:var(--celeste);font-weight:700;background:hsl(193 100% 45%/.06);">$0</td></tr>
+          <tr><td style="font-size:11px;color:var(--celeste);background:hsl(193 100% 45%/.06);">Flota externa (−100%)</td><td class="r" style="font-size:11px;color:var(--celeste);font-weight:700;background:hsl(193 100% 45%/.06);">$0</td></tr>
+          <tr><td style="font-size:11px;color:hsl(212 50% 70%);background:hsl(193 100% 45%/.06);">Contact Center (−15%)</td><td class="r" style="font-size:11px;color:hsl(212 50% 70%);background:hsl(193 100% 45%/.06);">$28.1M</td></tr>
+          <tr><td style="font-size:11px;color:hsl(212 50% 70%);background:hsl(193 100% 45%/.06);">3PL Picker <span style="font-size:9px;color:hsl(212 50% 55%);font-weight:500;">(0-3km)</span></td><td class="r" style="font-size:11px;color:hsl(212 50% 70%);background:hsl(193 100% 45%/.06);">$82.9M</td></tr>
+          <tr><td style="font-size:11px;color:hsl(212 50% 70%);background:hsl(193 100% 45%/.06);">Picker (orquest.)</td><td class="r" style="font-size:11px;color:hsl(212 50% 70%);background:hsl(193 100% 45%/.06);">$9.35M</td></tr>
+          <tr><td style="font-size:11px;color:hsl(212 50% 70%);background:hsl(193 100% 45%/.06);">Recaudo 3.5%</td><td class="r" style="font-size:11px;color:hsl(212 50% 70%);background:hsl(193 100% 45%/.06);">$5.5M</td></tr>
+          <tr><td style="font-size:12px;font-weight:800;color:white;border-top:2px solid hsl(193 100% 45%/.3);">Total logística</td><td class="r" style="font-size:12px;font-weight:800;color:var(--celeste);border-top:2px solid hsl(193 100% 45%/.3);">$125.9M</td></tr>
+        </table>
+      </div>
+    </div>
+    <div style="background:hsl(229 35% 12%);border-radius:12px;padding:11px 24px;display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1fr;gap:0;align-items:center;">
+      <div style="text-align:center;padding:0 10px;"><div class="lbl" style="color:hsl(346 100% 65%);">Costo / envío hoy</div><div style="font-size:24px;font-weight:900;color:hsl(346 100% 70%);line-height:1.1;">$19,011</div></div>
+      <div style="width:1px;height:36px;background:hsl(0 0% 100%/.12);"></div>
+      <div style="text-align:center;padding:0 10px;"><div class="lbl" style="color:hsl(162 80% 55%);">Con 50% Picker</div><div style="font-size:24px;font-weight:900;color:hsl(162 80% 65%);line-height:1.1;">$15,172 <span style="font-size:11px;font-weight:800;">−20%</span></div></div>
+      <div style="width:1px;height:36px;background:hsl(0 0% 100%/.12);"></div>
+      <div style="text-align:center;padding:0 10px;"><div class="lbl" style="color:hsl(162 80% 55%);">Con 75% Picker ⭐</div><div style="font-size:24px;font-weight:900;color:white;line-height:1.1;">$13,052 <span style="font-size:11px;font-weight:800;color:hsl(162 80% 60%);">−31%</span></div></div>
+      <div style="width:1px;height:36px;background:hsl(0 0% 100%/.12);"></div>
+      <div style="text-align:center;padding:0 10px;"><div class="lbl" style="color:var(--celeste);">Flota cero ⚡</div><div style="font-size:24px;font-weight:900;color:var(--celeste);line-height:1.1;">$10,933 <span style="font-size:11px;font-weight:800;">−43%</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S6 · VENTAS RECUPERADAS — nuevo, referencia JD -->
+<div class="slide">
+  <div class="content" style="display:flex;flex-direction:column;gap:16px;max-width:980px;">
+    <div style="text-align:center;">
+      <div class="label-bar green" style="display:inline-flex;">Beneficio adicional — Ventas recuperadas</div>
+      <h2 style="text-align:center;">La experiencia de entrega<br/><span style="color:var(--celeste);">decide si el cliente regresa a pedir.</span></h2>
+      <p class="sub-head" style="text-align:center;">El 87% de los compradores online decide si vuelve según la experiencia de entrega.</p>
+    </div>
+    <div class="grid2" style="gap:14px;align-items:stretch;">
+      <!-- HOY -->
+      <div class="card" style="display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;">
+        <div style="padding:12px 18px;background:var(--bg);border-bottom:1px solid var(--border);">
+          <div class="lbl">Hoy · flota fija sin SLA</div>
+        </div>
+        <div style="padding:14px 18px;flex:1;">
+          <div class="cmp-row"><span class="key">Promesa de entrega cumplida</span><span class="bad">~50%</span></div>
+          <div class="cmp-row"><span class="key">Experiencia del cliente</span><span class="bad">inconsistente</span></div>
+          <div class="cmp-row"><span class="key">Visibilidad del pedido</span><span class="bad">ninguna</span></div>
+          <div class="cmp-row"><span class="key">Cliente recurrente tardío</span><span class="bad">se aleja — no vuelve</span></div>
+          <div class="cmp-row"><span class="key">Llamadas al CC por tracking</span><span class="bad">15% del volumen</span></div>
+        </div>
+      </div>
+      <!-- CON PICKER -->
+      <div class="card" style="display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;border:2px solid var(--green-mid);">
+        <div style="padding:12px 18px;background:var(--green-dim);border-bottom:1px solid var(--green-mid);">
+          <div class="lbl" style="color:var(--green-text);">Con Picker · tracking + SLA en tiempo real</div>
+        </div>
+        <div style="padding:14px 18px;flex:1;">
+          <div class="cmp-row"><span class="key">Promesa de entrega cumplida</span><span class="good">fuerte y monitoreable</span></div>
+          <div class="cmp-row"><span class="key">Experiencia del cliente</span><span class="good">consistente y rastreable</span></div>
+          <div class="cmp-row"><span class="key">Visibilidad del pedido</span><span class="good">WhatsApp en tiempo real</span></div>
+          <div class="cmp-row"><span class="key">Recompra recuperada</span><span class="good">+3% a +6% del volumen</span></div>
+          <div class="cmp-row"><span class="key">Llamadas al CC por tracking</span><span class="good">eliminadas con WhatsApp</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- MINT BANNER — referencia JD -->
+    <div class="mint-banner">
+      <div class="label">Ventas incrementales por recompra · estimado con benchmarks de industria</div>
+      <div class="big">+$23.8M a +$47.5M COP/mes</div>
+      <div class="note">+3% a +6% en recompra · 330–660 pedidos adicionales · ticket $72,000 COP · se afina con tus cifras reales</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:12px;">
+        <div style="font-size:32px;font-weight:900;color:var(--celeste);">87%</div>
+        <div style="font-size:13px;color:var(--sub);font-weight:500;">de los compradores online decide si vuelve a pedir según la experiencia de la última entrega. <span style="font-weight:700;color:var(--text);">Benchmark de industria ecommerce LATAM.</span></div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:12px;">
+        <div style="font-size:32px;font-weight:900;color:var(--green-text);">+$61.4M</div>
+        <div style="font-size:13px;color:var(--sub);font-weight:500;">en ahorro operativo <span style="font-weight:700;color:var(--text);">más</span> hasta $47M en ventas adicionales. El impacto total supera los <span style="font-weight:700;color:var(--text);">$100M/mes.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S7 · SOCIAL PROOF — nuevo, referencia JD -->
+<div class="slide">
+  <div class="content" style="display:flex;flex-direction:column;gap:20px;max-width:900px;align-items:center;text-align:center;">
+    <div>
+      <div class="label-bar" style="display:inline-flex;">Respaldo</div>
+      <h2>Cadenas de restaurantes<br/>que ya confían en <span style="color:var(--celeste);">Picker.</span></h2>
+      <p class="sub-head">Delivery propio en LATAM — el mismo modelo que Salvator's: flota propia + carrier variable en una sola plataforma.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:820px;">
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 20px;">
+        <div style="height:64px;display:flex;align-items:center;justify-content:center;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Pizza_Hut_classic_logo.svg" alt="Pizza Hut" style="max-height:60px;max-width:150px;object-fit:contain;" onerror="this.outerHTML='<span style=\'font-size:20px;font-weight:900;color:#E21017;\'>Pizza Hut</span>'">
+        </div>
+        <div style="font-size:11px;color:var(--sub);font-weight:600;">Colombia</div>
+        <div style="background:var(--green-dim);border:1px solid var(--green-mid);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:800;color:var(--green-text);">Cliente activo</div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 20px;">
+        <div style="height:64px;display:flex;align-items:center;justify-content:center;">
+          <img src="https://companieslogo.com/img/orig/burgerking-db7853ce.svg?t=1720244494" alt="Burger King" style="max-height:60px;max-width:150px;object-fit:contain;" onerror="this.outerHTML='<span style=\'font-size:16px;font-weight:900;color:#D62300;\'>Burger King</span>'">
+        </div>
+        <div style="font-size:11px;color:var(--sub);font-weight:600;">Colombia · México</div>
+        <div style="background:var(--green-dim);border:1px solid var(--green-mid);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:800;color:var(--green-text);">Cliente activo</div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 20px;">
+        <div style="height:64px;display:flex;align-items:center;justify-content:center;">
+          <img src="https://kobe-sushi.com/wp-content/uploads/2021/07/Kobe-sushi-rolls-2.png" alt="KOBE Sushi" style="max-height:60px;max-width:150px;object-fit:contain;" onerror="this.outerHTML='<span style=\'font-size:16px;font-weight:900;\'>KOBE Sushi</span>'">
+        </div>
+        <div style="font-size:11px;color:var(--sub);font-weight:600;">Ecuador</div>
+        <div style="background:var(--green-dim);border:1px solid var(--green-mid);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:800;color:var(--green-text);">Cliente activo</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap;">
+      <div style="font-size:13px;color:var(--muted);font-weight:600;">+50 marcas en 7 países</div>
+      <div style="width:1px;height:16px;background:var(--border);"></div>
+      <div style="font-size:13px;color:var(--muted);font-weight:600;">Restaurantes con delivery propio</div>
+      <div style="width:1px;height:16px;background:var(--border);"></div>
+      <div style="font-size:13px;color:var(--muted);font-weight:600;">Sin cláusula de permanencia</div>
+    </div>
+    <div style="background:var(--text);border-radius:14px;padding:18px 32px;max-width:700px;width:100%;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--celeste);margin-bottom:8px;">Por qué importa para Salvator's</div>
+      <div style="font-size:16px;font-weight:700;color:white;line-height:1.4;">Estas cadenas tenían el mismo problema: flota propia en nómina fija y carriers sin control. Picker lo resolvió — y puede replicarlo para Salvator's en semanas.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S8 · CASO DE ÉXITO -->
+<div class="slide">
+  <div class="content" style="display:flex;flex-direction:column;gap:12px;max-width:980px;">
+    <div>
+      <div class="label-bar green" style="display:inline-flex;font-size:12px;padding:6px 18px;letter-spacing:.1em;">⭐ CASO DE ÉXITO · Cadena de Restaurantes</div>
+      <h2>Del mismo problema<br/><span style="color:var(--celeste);">a resultados reales en 6 meses con Picker.</span></h2>
+      <p class="sub-head">Flota propia + carriers externos · delivery canal propio · multi-local. La misma operación que Salvator's hoy.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="background:hsl(43 100% 50%);color:hsl(43 100% 14%);border-radius:8px;padding:7px 20px;font-size:17px;font-weight:900;letter-spacing:.06em;display:inline-flex;align-items:center;gap:8px;">💵 MONTOS EN USD</div>
+      <div style="font-size:13px;color:var(--muted);font-weight:500;">Dólares americanos — no COP</div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:var(--text);">
+            <th style="width:30%;padding:9px 18px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:hsl(212 50% 60%);border-bottom:none;">KPI</th>
+            <th style="width:18%;padding:9px 14px;text-align:right;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:hsl(346 100% 65%);border-bottom:none;">Antes <span style="font-size:13px;font-weight:900;color:hsl(43 100% 55%);">USD</span></th>
+            <th style="width:20%;padding:9px 14px;text-align:right;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:hsl(162 80% 60%);border-bottom:none;">Después <span style="font-size:13px;font-weight:900;color:hsl(43 100% 55%);">USD</span></th>
+            <th style="width:32%;padding:9px 18px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:white;border-bottom:none;">Resultado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- FIRST ROW: % Entregas exitosas -->
+          <tr style="background:hsl(162 100% 36%/.07);border-bottom:1px solid hsl(162 100% 36%/.2);">
+            <td style="padding:10px 18px;border-left:4px solid var(--green);">
+              <div style="font-size:13px;font-weight:800;color:var(--text);">✅ % Entregas exitosas</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:500;margin-top:2px;">Promedio mercado con 1 proveedor: 83%</div>
+            </td>
+            <td style="padding:10px 14px;text-align:right;font-size:17px;font-weight:800;color:var(--red);">83%</td>
+            <td style="padding:10px 14px;text-align:right;font-size:24px;font-weight:900;color:var(--green-text);">97–98%</td>
+            <td style="padding:10px 18px;text-align:right;"><span style="display:inline-block;background:var(--green-dim);border:2px solid var(--green);border-radius:20px;padding:5px 20px;font-size:20px;font-weight:900;color:var(--green-text);">↑ +15pp</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 18px;font-size:12px;font-weight:600;color:var(--sub);">Pedidos / mes</td>
+            <td style="padding:7px 14px;text-align:right;font-size:15px;font-weight:700;color:var(--muted);">3,200</td>
+            <td style="padding:7px 14px;text-align:right;font-size:18px;font-weight:900;color:var(--green-text);">6,000</td>
+            <td style="padding:7px 18px;text-align:right;"><span style="display:inline-block;background:var(--celeste-dim);border:1.5px solid var(--celeste-mid);border-radius:20px;padding:4px 16px;font-size:15px;font-weight:900;color:var(--celeste);">↑ +87%</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 18px;font-size:12px;font-weight:600;color:var(--sub);">Tiempo de entrega</td>
+            <td style="padding:7px 14px;text-align:right;font-size:15px;font-weight:700;color:var(--red);">60+ min</td>
+            <td style="padding:7px 14px;text-align:right;font-size:18px;font-weight:900;color:var(--green-text);">42 min</td>
+            <td style="padding:7px 18px;text-align:right;"><span style="display:inline-block;background:var(--green-dim);border:1.5px solid var(--green-mid);border-radius:20px;padding:4px 16px;font-size:15px;font-weight:900;color:var(--green-text);">↓ −30%</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 18px;font-size:12px;font-weight:600;color:var(--sub);">Conductores propios en nómina</td>
+            <td style="padding:7px 14px;text-align:right;font-size:15px;font-weight:700;color:var(--red);">30</td>
+            <td style="padding:7px 14px;text-align:right;font-size:18px;font-weight:900;color:var(--green-text);">13</td>
+            <td style="padding:7px 18px;text-align:right;"><span style="display:inline-block;background:var(--green-dim);border:1.5px solid var(--green-mid);border-radius:20px;padding:4px 16px;font-size:15px;font-weight:900;color:var(--green-text);">↓ −57%</span></td>
+          </tr>
+          <!-- HERO ROW -->
+          <tr style="background:hsl(162 100% 36%/.07);border-bottom:1px solid hsl(162 100% 36%/.2);">
+            <td style="padding:10px 18px;font-size:13px;font-weight:800;color:var(--text);border-left:4px solid var(--green);">💰 Costo fijo flota / mes</td>
+            <td style="padding:10px 14px;text-align:right;font-size:17px;font-weight:800;color:var(--red);">$22,500</td>
+            <td style="padding:10px 14px;text-align:right;font-size:24px;font-weight:900;color:var(--green-text);">$9,750</td>
+            <td style="padding:10px 18px;text-align:right;"><span style="display:inline-block;background:var(--green-dim);border:2px solid var(--green);border-radius:20px;padding:5px 20px;font-size:20px;font-weight:900;color:var(--green-text);">↓ −57%</span></td>
+          </tr>
+          <!-- HERO ROW -->
+          <tr style="background:hsl(162 100% 36%/.07);border-bottom:1px solid hsl(162 100% 36%/.2);">
+            <td style="padding:10px 18px;font-size:13px;font-weight:800;color:var(--text);border-left:4px solid var(--green);">📦 Costo por pedido</td>
+            <td style="padding:10px 14px;text-align:right;font-size:17px;font-weight:800;color:var(--red);">$7.03</td>
+            <td style="padding:10px 14px;text-align:right;font-size:24px;font-weight:900;color:var(--green-text);">$3.73</td>
+            <td style="padding:10px 18px;text-align:right;"><span style="display:inline-block;background:var(--green-dim);border:2px solid var(--green);border-radius:20px;padding:5px 20px;font-size:20px;font-weight:900;color:var(--green-text);">↓ −47%</span></td>
+          </tr>
+          <tr>
+            <td style="padding:7px 18px;font-size:12px;font-weight:600;color:var(--sub);">Ciudades con delivery activo</td>
+            <td style="padding:7px 14px;text-align:right;font-size:15px;font-weight:700;color:var(--muted);">1</td>
+            <td style="padding:7px 14px;text-align:right;font-size:18px;font-weight:900;color:var(--green-text);">3</td>
+            <td style="padding:7px 18px;text-align:right;"><span style="display:inline-block;background:var(--celeste-dim);border:1.5px solid var(--celeste-mid);border-radius:20px;padding:4px 16px;font-size:15px;font-weight:900;color:var(--celeste);">↑ +200%</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="background:var(--text);border-radius:12px;padding:13px 22px;display:flex;align-items:center;gap:16px;">
+      <div style="font-size:34px;flex-shrink:0;">💡</div>
+      <div style="font-size:14px;font-weight:700;color:white;line-height:1.4;">Misma situación: 30 conductores en nómina fija, carriers sin control. En 6 meses con Picker: <span style="color:hsl(162 80% 60%);">flota a 13, costo por pedido de $7.03 a $3.73 USD (−47%), 3 ciudades con delivery propio.</span> El mismo modelo que te proponemos hoy.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S9 · INVERSIÓN + GARANTÍA + ROI -->
+<div class="slide">
+  <div class="content" style="display:flex;flex-direction:column;gap:13px;">
+    <div><div class="label-bar">Inversión</div>
+      <h2>Transparente. Sin iguala. Solo pagas lo que usas.</h2></div>
+    <div class="grid2" style="gap:14px;align-items:stretch;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:10px 18px;background:var(--text);"><span style="font-size:13px;font-weight:800;color:white;">¿Qué paga Salvator's con Picker?</span></div>
+          <table class="tbl">
+            <thead><tr><th>Concepto</th><th class="r">Valor</th><th class="r">Total/mes</th></tr></thead>
+            <tbody>
+              <tr><td><div style="font-weight:700;font-size:13px;">Fee orquestación</div><div style="font-size:11px;color:var(--muted);">Todos los envíos — propios + 3PL</div></td><td class="r" style="font-size:15px;font-weight:900;">$850<span style="font-size:10px;font-weight:500;color:var(--muted);">/env</span></td><td class="r" style="font-size:15px;font-weight:900;color:var(--celeste);">$9.35M</td></tr>
+              <tr><td><div style="font-weight:700;font-size:13px;">Fee por local</div><div style="font-size:11px;color:var(--muted);">Eliminado — incluido en fee por envío</div></td><td class="r" style="font-size:15px;font-weight:900;color:var(--muted);">$0</td><td class="r" style="font-size:15px;font-weight:900;color:var(--muted);">$0</td></tr>
+              <tr><td><div style="font-weight:700;font-size:13px;">Comisión recaudo efectivo</div><div style="font-size:11px;color:var(--muted);">Solo pedidos en efectivo</div></td><td class="r" style="font-size:15px;font-weight:900;">3.5%</td><td class="r dim">Según volumen</td></tr>
+              <tr><td><div style="font-weight:700;font-size:13px;">Tarifa carriers 3PL</div><div style="font-size:11px;color:var(--muted);">Rappi, Cabify, MU, Pibox, ARMI</div></td><td class="r dim">Desde $6,200</td><td class="r dim">Según km</td></tr>
+              <tr class="total"><td>Fee Picker (orquestación)</td><td class="r">—</td><td class="r g">$9.35M/mes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- ROI MULTIPLICADOR — nuevo vs v3 -->
+        <div style="background:var(--text);border-radius:12px;padding:14px 20px;">
+          <div class="lbl dark" style="color:var(--celeste);margin-bottom:10px;">ROI · Por cada $1 COP que pagas a Picker</div>
+          <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0;align-items:center;">
+            <div style="text-align:center;padding:0 12px;">
+              <div style="font-size:11px;color:hsl(212 50% 60%);font-weight:600;margin-bottom:4px;">Solo ahorro operativo</div>
+              <div style="font-size:38px;font-weight:900;color:hsl(162 80% 60%);line-height:1;">~5x</div>
+              <div style="font-size:11px;color:hsl(212 50% 60%);margin-top:3px;">recuperas en ahorro de flota + CC</div>
+            </div>
+            <div style="width:1px;height:50px;background:hsl(0 0% 100%/.12);"></div>
+            <div style="text-align:center;padding:0 12px;">
+              <div style="font-size:11px;color:hsl(212 50% 60%);font-weight:600;margin-bottom:4px;">Ahorro + ventas recuperadas</div>
+              <div style="font-size:38px;font-weight:900;color:white;line-height:1;">~9x</div>
+              <div style="font-size:11px;color:hsl(212 50% 60%);margin-top:3px;">sumando recompra de clientes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- GARANTÍA -->
+      <div style="background:var(--green-dim);border:2px solid var(--green-mid);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="font-size:52px;line-height:1;flex-shrink:0;">🛡️</div>
+          <div>
+            <div class="lbl" style="color:var(--green-text);margin-bottom:5px;">Garantía Picker</div>
+            <div style="font-size:19px;font-weight:800;color:var(--text);line-height:1.25;">Si Picker no da resultados,<br/>devolvemos el fee.</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--green-mid);padding-top:12px;">
+          <div class="row-item"><div class="row-dot g"></div><span style="font-size:13.5px;font-weight:600;color:var(--text);">Devolución total del Fee de Picker de lo cobrado</span></div>
+          <div class="row-item"><div class="row-dot r"></div><span style="font-size:13px;color:var(--sub);">No incluye el valor de los envíos 3PL</span></div>
+          <div class="row-item"><div class="row-dot g"></div><span style="font-size:13.5px;font-weight:600;color:var(--text);">Tiempo máximo: 3 meses desde la firma</span></div>
+        </div>
+        <div style="border-top:1px solid var(--green-mid);padding-top:12px;">
+          <div class="lbl" style="color:var(--green-text);margin-bottom:8px;">Sin trampa</div>
+          <div class="row-item"><div class="row-dot g"></div><span style="font-size:13.5px;font-weight:600;color:var(--text);">Sin iguala — pagas solo lo que usas</span></div>
+          <div class="row-item"><div class="row-dot g"></div><span style="font-size:13.5px;font-weight:600;color:var(--text);">22 riders en My Fleet: tú los administras</span></div>
+          <div class="row-item"><div class="row-dot g"></div><span style="font-size:13.5px;font-weight:600;color:var(--text);">Piloto 1–2 locales — valida en 2–3 semanas antes de escalar</span></div>
+        </div>
+        <div style="border-top:1px solid var(--green-mid);padding-top:12px;margin-top:4px;">
+          <div class="lbl" style="color:var(--green-text);margin-bottom:8px;">Lo que Picker NO cobra — nunca</div>
+          <div class="row-item"><div class="row-dot g"></div><span style="font-size:13px;font-weight:700;color:var(--text);">Sin tarifas dinámicas — mismo precio en festivos, fines de semana, lluvia y horarios de alta demanda</span></div>
+          <div class="row-item"><div class="row-dot g"></div><span style="font-size:13px;font-weight:700;color:var(--text);">Sin costo de implementación ni de integración</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S9 · PRÓXIMOS PASOS -->
+<div class="slide">
+  <div class="content" style="display:flex;flex-direction:column;gap:22px;max-width:900px;">
+    <div>
+      <div class="label-bar">Próximos pasos</div>
+      <h2>Del acuerdo al primer envío<br/><span style="color:var(--celeste);">en menos de 2 semanas.</span></h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:stretch;">
+      <div class="card" style="border-top:4px solid var(--celeste);display:flex;flex-direction:column;align-items:center;gap:11px;padding:22px 18px;text-align:center;">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--celeste-dim);border:3px solid var(--celeste);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:var(--celeste);">1</div>
+        <div class="lbl" style="color:var(--celeste);">Esta semana</div>
+        <div style="font-size:17px;font-weight:800;">Acordar</div>
+        <div style="font-size:13px;color:var(--sub);">Flujos de datáfono, IT y condiciones</div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--amber);display:flex;flex-direction:column;align-items:center;gap:11px;padding:22px 18px;text-align:center;">
+        <div style="width:60px;height:60px;border-radius:50%;background:hsl(43 100% 67%/.15);border:3px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:var(--amber);">2</div>
+        <div class="lbl" style="color:var(--amber);">Semana 1</div>
+        <div style="font-size:17px;font-weight:800;">Setup</div>
+        <div style="font-size:13px;color:var(--sub);">My Fleet, Flows y ARMI configurados</div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--green);display:flex;flex-direction:column;align-items:center;gap:11px;padding:22px 18px;text-align:center;">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--green-dim);border:3px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:var(--green-text);">3</div>
+        <div class="lbl" style="color:var(--green-text);">Semana 2–3</div>
+        <div style="font-size:17px;font-weight:800;">Piloto</div>
+        <div style="font-size:13px;color:var(--sub);">1–2 locales, 2–3 semanas — datos reales</div>
+      </div>
+      <div style="background:var(--text);border-radius:14px;border-top:4px solid hsl(162 80% 55%);display:flex;flex-direction:column;align-items:center;gap:11px;padding:22px 18px;text-align:center;">
+        <div style="width:60px;height:60px;border-radius:50%;background:hsl(162 80% 60%/.15);border:3px solid hsl(162 80% 55%);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:hsl(162 80% 60%);">4</div>
+        <div class="lbl" style="color:hsl(162 80% 60%);">Semana 4</div>
+        <div style="font-size:17px;font-weight:800;color:white;">Escala</div>
+        <div style="font-size:13px;color:hsl(212 50% 65%);">Ahorro confirmado → decisión con datos</div>
+      </div>
+    </div>
+    <div style="background:var(--celeste-dim);border:2px solid hsl(193 100% 45%/.3);border-radius:12px;padding:14px 28px;display:flex;align-items:center;gap:14px;">
+      <div style="font-size:34px;flex-shrink:0;">⚡</div>
+      <div style="font-size:15px;font-weight:700;color:var(--celeste);">El primer envío Picker puede salir en menos de 2 semanas.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #deck -->
+<div id="slide-num">1 / 10</div>
+<div id="nav">
+  <button class="nav-btn" id="prev" onclick="move(-1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <div id="indicators"></div>
+  <button class="nav-btn" id="next" onclick="move(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+</div>
+<script>
+  const slides = document.querySelectorAll('.slide'), total = slides.length; let cur = 0;
+  const iw = document.getElementById('indicators');
+  slides.forEach((_,i) => { const d = document.createElement('div'); d.className='dot'+(i===0?' on':''); d.onclick=()=>go(i); iw.appendChild(d); });
+  function go(n) { slides[cur].classList.remove('active'); slides[cur].classList.add('exit'); setTimeout(()=>slides[cur].classList.remove('exit'),420); cur=n; slides[cur].classList.add('active'); document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur)); document.getElementById('slide-num').textContent=`${cur+1} / ${total}`; document.getElementById('prev').disabled=cur===0; document.getElementById('next').disabled=cur===total-1; }
+  function move(d) { if(cur+d>=0&&cur+d<total) go(cur+d); }
+  document.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'||e.key==='ArrowDown') move(1); if(e.key==='ArrowLeft'||e.key==='ArrowUp') move(-1); });
+</script>
+</body>
+</html>
